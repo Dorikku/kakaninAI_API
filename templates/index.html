@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>YOLO Image Upload</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+    }
+    #preview {
+      max-width: 100%;
+      margin-top: 1rem;
+    }
+    #results {
+      margin-top: 1rem;
+      white-space: pre-wrap;
+      background-color: #f4f4f4;
+      padding: 1rem;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Upload Image for YOLO Detection</h1>
+  <form id="upload-form">
+    <input type="file" id="image-input" name="image" accept="image/*" required />
+    <button type="submit">Upload</button>
+  </form>
+  <img id="preview" src="#" alt="Image Preview" style="display:none;" />
+  <div id="results"></div>
+
+  <script>
+    const form = document.getElementById('upload-form');
+    const imageInput = document.getElementById('image-input');
+    const preview = document.getElementById('preview');
+    const results = document.getElementById('results');
+
+    imageInput.addEventListener('change', () => {
+      const file = imageInput.files[0];
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+      } else {
+        preview.style.display = 'none';
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const file = imageInput.files[0];
+      if (!file) {
+        alert('Please select an image file.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const response = await fetch('http://192.168.254.122:5000/predict', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        results.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        results.textContent = `Error: ${error.message}`;
+      }
+    });
+  </script>
+</body>
+</html>

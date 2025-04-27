@@ -1,0 +1,9 @@
+# Ignore OS-generated files
+Thumbs.db
+
+# Ignore dependency folders
+venv/
+
+# Ignore environment files
+.env
+*.log
