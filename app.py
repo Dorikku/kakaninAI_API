@@ -57,7 +57,7 @@ def predict():
         file.save(filepath)
 
         # get result
-        results = model.predict(filepath, save=True, project="static", exist_ok=True)
+        results = model.predict(filepath, save=True, project="static", exist_ok=True, conf=0.4)
 
         for result in results:
             names = [result.names[cls.item()] for cls in result.boxes.cls.int()]    # get kakanin_names of each box
@@ -78,17 +78,24 @@ def predict():
 
         print(result_list)
         
-        os.remove(filepath)
+        # os.remove(filepath)
+
+        # removes the file extension from the filename
+        filename = os.path.splitext(filename)[0]
+        filename = f"{filename}.jpg"
 
         if not names:
-            return jsonify({'error': 'No Kakanin Detected'}), 200
+            # return jsonify({'error': 'No Kakanin Detected'}), 200
+            return jsonify({
+                'result_list': [],
+                'image_url': f'http://{get_local_ip()}:5000/static/predict/{filename}'
+            }), 200
         
 
-                # Wait until the saved prediction image appears
-        # output_path = f"static/predict/{filename}"
+        # Wait until the saved prediction image appears
         full_output_path = os.path.join("static", "predict", filename)
 
-        timeout = 10  # seconds
+        timeout = 60  # seconds
         waited = 0
         while not os.path.exists(full_output_path) and waited < timeout:
             print("file not exists")
@@ -108,9 +115,9 @@ def predict():
     return jsonify({'error': 'Invalid file type'}), 400
 
 
-# @app.route('/')
-# def index():
-#     return render_template('index.html')
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
 if __name__ == "__main__":
